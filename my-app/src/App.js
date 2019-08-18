@@ -1,17 +1,18 @@
 import React, {Component, Fragment} from 'react';
 import './App.css';
 
-import data from "./data/data.json";
 import uuid from "react-uuid";
 
 import {Header} from "./components/Header/Header";
 import {Cards} from "./components/Cards/Cards";
+import {Form} from './components/Form/Form';
 
 class App extends Component {
 
   state = {
       showCards: true,
-      data: []
+      data: [],
+      formOpened: false
   }
 
   componentDidMount() {
@@ -19,29 +20,33 @@ class App extends Component {
   }
 
   setData = () => {
-    const loadedData = [...data];
 
-    loadedData.forEach(item => {
-      item.id = uuid();
+   fetch(`https://hyperiontworeactbase-b3081.firebaseio.com/people.json`)
+    .then(response => {
+      return response.json()
     })
+   .then(response => {
+     const persons = [];
+
+     for(let person in response) {
+      response[person].id = person;
+      persons.push(response[person])
+     }
 
     this.setState({
-    data: loadedData
+    data: persons
     })
-
+    
+   })
   }
 
   onCardRemove = (id) => {
-    let newData = [...this.state.data];
-
-    newData = newData.filter(item => {
-      return item.id !== id;
+    fetch(`https://hyperiontworeactbase-b3081.firebaseio.com/people/${id}.json`, {
+      method: "DELETE",
     })
-    
-    this.setState({
-      data: newData
+    .then(response => {
+       this.setData();
     })
-
   }
 
   onCardDuplicate = (id) => {
@@ -59,17 +64,37 @@ class App extends Component {
     })
   }
 
+  onFormOpen = () => {
+    this.setState({
+      formOpened: true
+    })
+  }
+
+   onFormClose = () => {
+    this.setState({
+      formOpened: false
+    })
+  }
+
   renderCards = () => {
     const {data, searchedData, showCards} = this.state;
     const displayData = searchedData || data;
 
     return (
-      showCards && data.length
+      showCards
      ? <Cards data={displayData}
               removeCard={(id) => this.onCardRemove(id)}
-              duplicateCard={(id) => this.onCardDuplicate(id)}/> 
+              duplicateCard={(id) => this.onCardDuplicate(id)}
+              openForm={this.onFormOpen}/> 
      : null
      )
+  }
+
+  renderForm = () => {
+    if(this.state.formOpened) {
+      return <Form closeForm={this.onFormClose}
+                   createCard={data => this.onCardCreate(data)} />
+    }
   }
 
   onCardSearch = (data) => {
@@ -78,15 +103,32 @@ class App extends Component {
      })
   }
 
+  onCardCreate = (item) => {
+      fetch(`https://hyperiontworeactbase-b3081.firebaseio.com/people.json`,{
+        method: "POST",
+        body: JSON.stringify(item)
+      })
+      .then(response => {
+        this.setData();
+      })
+
+      this.setState({
+      formOpened: false
+      })
+  }
+
   render() {
+    const {data} = this.state;
       return (
         <Fragment>
-        <Header className="full-width" 
-                data={this.state.data}
-                onSearch={(data) => this.onCardSearch(data)}
-                 />
+          <Header className="full-width" 
+                       data={data}
+                       onSearch={(data) => this.onCardSearch(data)}
+                        /> 
+             
         <div className="main-content" onClick={this.update}>
           {this.renderCards()}
+          {this.renderForm()}
         </div>
         </Fragment>
       );

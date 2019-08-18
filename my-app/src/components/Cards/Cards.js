@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Fragment} from "react";
 import {Card} from "../Card/Card";
 import "./Cards.css";
 
@@ -15,11 +15,14 @@ const Cards = (props) => {
   )
 
 	return (
-      <div className="cards">
-	      <div className="wrapper">
-	        {renderCards()}
-	      </div>
-      </div> 
+    <Fragment>
+      <span className="add-card" onClick={props.openForm}>+</span>
+        <div className="cards">
+  	      <div className="wrapper">
+  	        {renderCards()}
+  	      </div>
+        </div> 
+      </Fragment>
 	)
 }
 
