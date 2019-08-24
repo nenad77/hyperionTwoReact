@@ -20,6 +20,11 @@ const reducer = (state = initialState, action) => {
     		name: action.value,
     		lastName: action.lastName
     	  }
+    	case actionTypes.SET_DATA:
+    	    return {
+    	    	...state,
+    	    	data: action.data
+    	    }
     	default:
     	    return state;  
     }

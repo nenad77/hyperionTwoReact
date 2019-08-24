@@ -2,35 +2,21 @@ import React, {Component} from 'react';
 
 import uuid from "react-uuid";
 import {Cards} from "../../components/Cards/Cards";
+import {connect} from 'react-redux';
+import {setData} from '../../store/actionCreators';
 
-class CardsPage extends Component {
+class CardsPageClass extends Component {
 
 	state = {
 		data: []
 	}
 
-	  componentDidMount() {
-      this.setData();
+  static defaultProps = {
+    data: []
   }
 
-  setData = () => {
-   fetch(`https://hyperiontworeactbase-b3081.firebaseio.com/people.json`)
-    .then(response => {
-      return response.json()
-    })
-   .then(response => {
-     const persons = [];
-
-     for(let person in response) {
-      response[person].id = person;
-      persons.push(response[person])
-     }
-
-    this.setState({
-    data: persons
-    })
-    
-   })
+	  componentDidMount() {
+      this.props.setData();
   }
 
 	  onCardSearch = (data) => {
@@ -82,7 +68,7 @@ class CardsPage extends Component {
     const displayData = searchedData || data;
 
     return (
-      <Cards data={displayData}
+      <Cards 
               removeCard={(id) => this.onCardRemove(id)}
               duplicateCard={(id) => this.onCardDuplicate(id)}
               openForm={this.onFormOpen}/> 
@@ -97,4 +83,18 @@ class CardsPage extends Component {
 
 }
 
-  export {CardsPage};
+const mapStateToProps = state => {
+  return {
+
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setData: () => dispatch(setData())
+  }
+}
+
+const CardsPage = connect(mapStateToProps, mapDispatchToProps)(CardsPageClass);  
+
+export {CardsPage};
